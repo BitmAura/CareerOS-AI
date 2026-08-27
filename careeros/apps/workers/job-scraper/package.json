@@ -1,0 +1,35 @@
+{
+  "name": "job-scraper",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "uvicorn src.main:app --reload",
+    "start": "uvicorn src.main:app --host 0.0.0.0 --port 8002",
+    "test": "pytest",
+    "lint": "flake8 src",
+    "format": "black src"
+  },
+  "dependencies": {
+    "fastapi": "^0.111.0",
+    "uvicorn": "^0.30.0",
+    "pydantic": "^2.7.0",
+    "python-dotenv": "^1.0.0",
+    "supabase": "^2.6.0",
+    "redis": "^5.0.0",
+    "bullmq": "^1.88.0",
+    "crawl4ai": "^0.4.0",
+    "firecrawl": "^1.0.0",
+    "requests": "^2.31.0",
+    "beautifulsoup4": "^4.12.0",
+    "playwright": "^1.44.0",
+    "selenium": "^4.21.0",
+    "fake-useragent": "^1.4.0"
+  },
+  "devDependencies": {
+    "pytest": "^8.3.0",
+    "pytest-asyncio": "^0.23.0",
+    "black": "^24.4.0",
+    "flake8": "^7.1.0",
+    "mypy": "^1.10.0"
+  }
+}

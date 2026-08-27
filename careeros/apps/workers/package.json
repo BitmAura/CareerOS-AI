@@ -1,0 +1,16 @@
+{
+  "name": "workers",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "resume-parser": "cd apps/workers/resume-parser && python -m src.main",
+    "job-scraper": "cd apps/workers/job-scraper && python -m src.main",
+    "ai-pipeline": "cd apps/workers/ai-pipeline && python -m src.main",
+    "dev:resume-parser": "cd apps/workers/resume-parser && uvicorn src.main:app --reload",
+    "dev:job-scraper": "cd apps/workers/job-scraper && uvicorn src.main:app --reload",
+    "dev:ai-pipeline": "cd apps/workers/ai-pipeline && uvicorn src.main:app --reload",
+    "test": "pytest",
+    "lint": "flake8 .",
+    "format": "black ."
+  }
+}

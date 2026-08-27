@@ -1,0 +1,38 @@
+{
+  "name": "resume-parser",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "uvicorn src.main:app --reload --port 8001",
+    "start": "uvicorn src.main:app --host 0.0.0.0 --port 8001",
+    "test": "pytest",
+    "lint": "flake8 src",
+    "format": "black src"
+  },
+  "dependencies": {
+    "fastapi": "^0.111.0",
+    "uvicorn": "^0.30.0",
+    "python-multipart": "^0.0.9",
+    "pydantic": "^2.7.0",
+    "python-dotenv": "^1.0.0",
+    "supabase": "^2.6.0",
+    "redis": "^5.0.0",
+    "bullmq": "^1.88.0",
+    "docling": "^1.0.0",
+    "markitdown": "^0.0.0",
+    "langchain": "^0.2.0",
+    "langchain-openai": "^0.1.0",
+    "openai": "^1.30.0",
+    "tiktoken": "^0.7.0",
+    "pypdf2": "^1.0.0",
+    "python-docx": "^1.1.0",
+    "pillow": "^10.3.0"
+  },
+  "devDependencies": {
+    "pytest": "^8.3.0",
+    "pytest-asyncio": "^0.23.0",
+    "black": "^24.4.0",
+    "flake8": "^7.1.0",
+    "mypy": "^1.10.0"
+  }
+}

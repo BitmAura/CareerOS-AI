@@ -1,0 +1,15 @@
+{
+  "name": "carrer-os-ai",
+  "private": true,
+  "description": "Workspace root — app lives in careeros/. Run npm run dev from here.",
+  "scripts": {
+    "dev": "npm run dev --prefix careeros/apps/web",
+    "dev:web": "npm run dev --prefix careeros/apps/web",
+    "dev:mono": "npm run dev --prefix careeros",
+    "build": "npm run build --prefix careeros/apps/web",
+    "start": "npm run start --prefix careeros/apps/web",
+    "test": "npm test --prefix careeros/apps/web",
+    "lint": "npm run lint --prefix careeros/apps/web",
+    "typecheck": "npm exec --prefix careeros/apps/web -- tsc --noEmit"
+  }
+}

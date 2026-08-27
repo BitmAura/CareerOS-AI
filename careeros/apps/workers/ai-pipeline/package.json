@@ -1,0 +1,42 @@
+{
+  "name": "ai-pipeline",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "uvicorn src.main:app --reload",
+    "start": "uvicorn src.main:app --host 0.0.0.0 --port 8003",
+    "test": "pytest",
+    "lint": "flake8 src",
+    "format": "black src"
+  },
+  "dependencies": {
+    "fastapi": "^0.111.0",
+    "uvicorn": "^0.30.0",
+    "pydantic": "^2.7.0",
+    "python-dotenv": "^1.0.0",
+    "supabase": "^2.6.0",
+    "redis": "^5.0.0",
+    "bullmq": "^1.88.0",
+    "mastra": "^0.8.0",
+    "praisonai": "^0.3.0",
+    "langchain": "^0.2.0",
+    "langchain-openai": "^0.1.0",
+    "openai": "^1.30.0",
+    "anthropic": "^0.28.0",
+    "google-generativeai": "^0.7.0",
+    "deepseek": "^1.0.0",
+    "cohere": "^5.0.0",
+    "tiktoken": "^0.7.0",
+    "numpy": "^1.26.0",
+    "scikit-learn": "^1.5.0",
+    "sentence-transformers": "^3.0.0",
+    "pgvector": "^0.3.0"
+  },
+  "devDependencies": {
+    "pytest": "^8.3.0",
+    "pytest-asyncio": "^0.23.0",
+    "black": "^24.4.0",
+    "flake8": "^7.1.0",
+    "mypy": "^1.10.0"
+  }
+}

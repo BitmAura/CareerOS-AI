@@ -1,0 +1,45 @@
+---
+description: Premium product marketing copy standards for CareerOS (landing, FAQ, pricing). Apply with karpathy-guidelines — clear, honest, no SEO theatre.
+alwaysApply: false
+globs:
+  - "apps/web/src/components/marketing/**"
+  - "apps/web/src/lib/seo/**"
+  - "apps/web/src/app/page.tsx"
+  - "apps/web/public/llms.txt"
+---
+
+# CareerOS premium content standards
+
+Use with **karpathy-guidelines**: simplicity first, surgical edits, verifiable claims.
+
+## Voice
+- Write for a candidate (e.g. 8 years Purchase), not for other AIs or founders.
+- Short sentences. One idea per block.
+- Prefer concrete numbers already in product (`15` seats, `3` searches/day).
+
+## Allowed claims
+- Assisted Confirm apply (human confirms).
+- ATS-**style** readiness (not live employer ATS).
+- Pan-India; cities are preference, not a hard wall.
+- Manufacturing Purchase/SCM first; other industries via packs.
+- Concierge available now; Pro when inventory is ready.
+
+## Forbidden on customer-facing pages
+- Internal jargon: “AEO/GEO”, “citation rate”, “sellable now”, “founder blueprint”.
+- Promising whole-web scrape or silent LinkedIn/Naukri Easy Apply.
+- Keyword stuffing or repeating the brand name in every sentence.
+- Fake social proof / fake interview rates.
+
+## Structure (landing)
+1. Brand → one headline → one support line → CTAs
+2. How it works (3 steps)
+3. Features (what exists)
+4. Comparison table (honest tradeoffs)
+5. Plans
+6. FAQ (questions people actually ask)
+7. Footer with internal links
+
+## SEO / AEO (implementation, not copy)
+- Keep JSON-LD + FAQ schema + sitemap + robots + `llms.txt`.
+- Do not explain those mechanisms in the visible FAQ intro.
+- Backlinks are off-site (content, outreach) — not something the page “installs.”
