@@ -3,7 +3,7 @@ import { PRODUCT_STANCE } from "@/lib/product/stance";
 export const LANDING_FAQS = [
   {
     q: "What is CareerOS AI?",
-    a: "CareerOS AI is an assisted Career Operating System for job seekers in India. It helps you set career targets, improve your resume with an ATS-style score, get a short daily list of graded jobs, prepare a tailored apply packet, Confirm apply yourself, and track the pipeline — instead of spraying Easy Apply.",
+    a: "CareerOS AI is an assisted Career Operating System for India manufacturing hunters (Purchase, procurement, SCM, plant). It grades OEM/careers seats, prepares a packet, and you Confirm apply — not a silent Easy Apply bot, and not a hunt for every industry.",
   },
   {
     q: "How many job applications can I do per day?",
@@ -23,7 +23,7 @@ export const LANDING_FAQS = [
   },
   {
     q: "Who is CareerOS for first?",
-    a: "India manufacturing Purchase, procurement, and supply-chain professionals first (plant, OEM, and industrial). Healthcare and other industries ship next as industry packs on the same OS.",
+    a: "Only India manufacturing: Purchase, procurement, SCM, plant ops, and industrial sales into those plants. IT, banking, campus, and healthcare are not the daily hunt. You can still paste a JD, but live seats come from OEM/plant boards.",
   },
 ];
 

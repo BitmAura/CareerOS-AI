@@ -36,7 +36,7 @@ const pitchProblems = [
 const pitchSolves = [
   {
     title: "One profile & targets",
-    body: "Role, years, cities (Pan-India), CTC, industry pack — the hunt starts from you, not from a random feed.",
+    body: "Role, years, cities (Pan-India), CTC — manufacturing pack. The hunt starts from you, not a random feed.",
   },
   {
     title: "Resume + ATS-style readiness together",
@@ -53,9 +53,9 @@ const pitchSolves = [
 ];
 
 const steps = [
-  { n: "01", title: "Account + targets", body: "Who you are hunting for (role, years, cities, pack)." },
+  { n: "01", title: "Account + targets", body: "Purchase / SCM / plant role, years, Pan-India cities, CTC." },
   { n: "02", title: "Resume ready", body: "Scorecard + builder so the packet starts from a strong base." },
-  { n: "03", title: "Daily graded seats", body: "Short queue with why / gaps — not 200 junk links." },
+  { n: "03", title: "Daily graded seats", body: "OEM + plant seats with why / gaps — not 200 junk links." },
   { n: "04", title: "Packet + Confirm", body: "Tailored resume + cover; you Confirm and submit." },
   { n: "05", title: "Track pipeline", body: "Move each role through applied → interview → offer." },
 ];
@@ -221,13 +221,15 @@ export function LandingPage() {
           <h1 className="mb-5 font-heading text-5xl font-extrabold tracking-tight text-[#12161c] md:text-7xl lg:text-8xl animate-[fadeUp_0.8s_ease_both]">
             CareerOS
           </h1>
+          <p className="mb-3 inline-block rounded-full border border-[#c45c26]/40 bg-[#c45c26]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#a84c20] animate-[fadeUp_0.75s_ease_both]">
+            India manufacturing only — Purchase, SCM, plant
+          </p>
           <p className="max-w-2xl text-2xl font-semibold leading-tight tracking-tight text-[#12161c] md:text-4xl animate-[fadeUp_0.9s_ease_both]">
-            Resume here. ATS there. Jobs everywhere. CareerOS is the one system.
+            Daily hunt OS for plant, OEM, and procurement roles — not every industry.
           </p>
           <p className="mt-4 max-w-xl text-base text-[#3d4654] md:text-lg animate-[fadeUp_1s_ease_both]">
-            Stop bouncing between builders, score checkers, and job portals that never feel genuine.
-            Run one daily OS — graded seats, packets, Confirm apply — built for India, starting with
-            Purchase &amp; SCM.
+            Graded seats from OEM Workday and careers pages, tailored packets, you Confirm apply.
+            Built for India manufacturing hunters. Not IT, banking, campus, or Easy Apply bots.
           </p>
           <div className="mt-8 flex flex-wrap gap-3 animate-[fadeUp_1.1s_ease_both]">
             <Link href="/register" className={cn(buttonVariants({ size: "lg" }), "gap-2")}>
@@ -258,8 +260,8 @@ export function LandingPage() {
                 <p className="text-sm text-white/70">Confirmed seats / day max</p>
               </div>
               <div className="border-l-2 border-white/20 pl-4">
-                <p className="font-heading text-3xl font-bold">Pan-India</p>
-                <p className="text-sm text-white/70">Cities prefer — never wall off</p>
+                <p className="font-heading text-3xl font-bold">OEM + plant</p>
+                <p className="text-sm text-white/70">Manufacturing boards — Pan-India cities</p>
               </div>
             </div>
           </div>
@@ -272,7 +274,7 @@ export function LandingPage() {
             How it works
           </h2>
           <p className="mt-2 max-w-xl text-[#3d4654]">
-            One roof for the hunt — not five tabs and an Easy Apply gun.
+            One roof for the India manufacturing hunt — not five tabs and an Easy Apply gun.
           </p>
           <ol className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
             {steps.map((s) => (
@@ -485,7 +487,7 @@ export function LandingPage() {
             CareerOS
           </p>
           <p className="mt-4 text-white/70">
-            Your next role shouldn’t depend on random Easy Apply. Run the OS.
+            Next plant / procurement role shouldn’t depend on Easy Apply. Run the manufacturing OS.
           </p>
           <Link
             href="/register"
@@ -507,7 +509,7 @@ export function LandingPage() {
               CareerOS AI
             </p>
             <p className="mt-2 max-w-xs">
-              Assisted Career Operating System for India — Purchase &amp; SCM first, Pan-India.
+              Assisted Career OS for India manufacturing only — Purchase, SCM, plant. Pan-India.
             </p>
           </div>
           <div>
