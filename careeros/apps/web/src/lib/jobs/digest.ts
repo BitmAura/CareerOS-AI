@@ -50,6 +50,14 @@ export function scoreJobAgainstProfile(
   return evaluateJobMatch(job, profileText, targets).score;
 }
 
+/** Invented catalog rows (fake title + homepage URL) must never sit in Daily queue. */
+export function isRealQueueOpening(job?: Pick<JobRecord, "sourceKind" | "source"> | null): boolean {
+  if (!job) return false;
+  if (job.sourceKind === "live" || job.sourceKind === "paste") return true;
+  const src = (job.source || "").toLowerCase();
+  return /tinyfish|portal|workday|greenhouse|lever|ashby/.test(src);
+}
+
 export function rankJobsForDigest(
   jobs: JobRecord[],
   profileText: string,

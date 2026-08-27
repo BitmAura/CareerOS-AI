@@ -337,6 +337,16 @@ export function evaluateJobMatch(
   };
 }
 
+export function seniorityClash(jobTitle: string, targets?: CareerTargets | null): boolean {
+  const want = `${targets?.targetRole || ""}`.toLowerCase();
+  const title = jobTitle.toLowerCase();
+  const juniorWant =
+    /get|trainee|intern|fresher|graduate engineer|campus/.test(want) ||
+    (targets?.yearsExperience != null && targets.yearsExperience <= 1);
+  const seniorJob = /\b(manager|director|head|lead|principal|vp|chief)\b/.test(title);
+  return juniorWant && seniorJob;
+}
+
 /** Hard admission check before seating a job in digest. */
 export function passesAdmissionFloor(
   rubric: MatchRubric,
@@ -345,6 +355,7 @@ export function passesAdmissionFloor(
   floor = 58,
 ): boolean {
   if (rubric.score < floor) return false;
+  if (seniorityClash(job.title, targets)) return false;
   const family = inferRoleFamily(targets);
   const jobFamily =
     job.roleFamily || inferRoleFamilyFromText(`${job.title} ${job.description}`);

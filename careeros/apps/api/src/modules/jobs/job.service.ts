@@ -24,7 +24,7 @@ const EXPANDED_MANUFACTURING_JOBS: Partial<Job>[] = [
     description: "Own end-to-end supply chain planning, OTIF delivery compliance, raw material inventory, and rail freight logistics.",
     requirements: JSON.stringify(["Supply Chain", "Logistics", "OTIF", "Forecasting", "SAP", "6+ years"]),
     source: "jsw_careers",
-    sourceUrl: "https://www.jsw.in/careers",
+    sourceUrl: "https://www.jswsteel.in/careers/",
     matchScore: 88,
     isActive: true,
   },

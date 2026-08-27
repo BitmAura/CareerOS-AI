@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { isJobDetailUrl } from "@/lib/jobs/extract-job-url";
 import { isUsablePublicJobUrl, buildDigestSearchQueries } from "@/lib/jobs/live-discover";
 import { evaluateJobMatch, passesAdmissionFloor } from "@/lib/jobs/match-rubric";
-import { digestLimitForRun, remainingQueueSeats, rankJobsForDigest } from "@/lib/jobs/digest";
+import { digestLimitForRun, isRealQueueOpening, remainingQueueSeats, rankJobsForDigest } from "@/lib/jobs/digest";
 import { parseNoticeDays, parseSalaryLpa, freshnessDays } from "@/lib/jobs/job-signals";
 import { encodeQueueNotes, mergeQueueNotes, parseQueueNotes } from "@/lib/jobs/queue-notes";
 import {
@@ -173,6 +173,33 @@ describe("location + family admission", () => {
     );
     expect(ranked.every((r) => r.job.roleFamily === "sales")).toBe(true);
     expect(ranked.some((r) => r.job.title.includes("Sales"))).toBe(true);
+  });
+
+  it("rejects GET/trainee vs Manager/Lead titles", () => {
+    const targets = {
+      targetRole: "Graduate Engineer Trainee",
+      yearsExperience: 0,
+      cities: ["Pune"],
+      industryPack: "manufacturing_scm" as const,
+      openToRelocate: true,
+    };
+    const manager = job({
+      title: "Vendor Development Manager",
+      company: "Bharat Forge",
+      description: "vendor quality procurement manufacturing",
+      roleFamily: "procurement",
+      requirements: ["Vendor Development", "7+ years"],
+    });
+    expect(passesAdmissionFloor(evaluateJobMatch(manager, "get trainee", targets), manager, targets)).toBe(
+      false,
+    );
+  });
+
+  it("does not treat catalog seeds as real queue openings", () => {
+    expect(
+      isRealQueueOpening({ sourceKind: "beachhead", source: "beachhead" }),
+    ).toBe(false);
+    expect(isRealQueueOpening({ sourceKind: "live", source: "workday" })).toBe(true);
   });
 
   it("roleFamiliesCompatible works", () => {

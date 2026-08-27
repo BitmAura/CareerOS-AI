@@ -4,6 +4,7 @@ import { localStore } from "@/lib/db/local-store";
 import {
   digestLimitForRun,
   profileTextFromResume,
+  isRealQueueOpening,
   rankJobsForDigest,
   remainingQueueSeats,
   todayDigestDate,
@@ -102,7 +103,9 @@ export async function GET(req: Request) {
       .eq("digest_date", date)
       .order("match_score", { ascending: false });
     if (error) return NextResponse.json({ message: error.message }, { status: 500 });
-    const items = (data || []).map((r) => mapSbQueue(r, r.jobs as Record<string, unknown>));
+    const items = (data || [])
+      .map((r) => mapSbQueue(r, r.jobs as Record<string, unknown>))
+      .filter((item) => isRealQueueOpening(item.job));
     const { data: runRows } = await sb
       .from("digest_runs")
       .select("*")
@@ -144,11 +147,12 @@ export async function GET(req: Request) {
     }),
   );
   const runs = await localStore.listDigestRuns(user.id, date);
+  const visible = enriched.filter((item) => isRealQueueOpening(item.job));
   return NextResponse.json({
     date,
-    items: enriched,
+    items: visible,
     runs,
-    ...stancePayload(runs, enriched.length),
+    ...stancePayload(runs, visible.length),
   });
 }
 
@@ -321,7 +325,7 @@ export async function POST(req: Request) {
           : result.sources?.live
             ? `Live TinyFish: ${result.sources.live} · beachhead fill: ${result.sources.beachhead}`
             : result.live?.searched === false
-              ? "Beachhead seeds only — set TINYFISH_API_KEY for live public careers search."
+              ? "No live OEM seats this run. Paste a real job URL — we do not invent titles."
               : undefined,
       ...stancePayload(runs, allItems.length),
     });
@@ -471,6 +475,9 @@ export async function POST(req: Request) {
       description: String(j.description || ""),
       requirements: (j.requirements as string[]) || [],
       source: String(j.source || "career_page"),
+      sourceKind: /tinyfish|workday|portal|greenhouse/.test(String(j.source || "").toLowerCase())
+        ? "live"
+        : "career_page",
       sourceUrl: j.source_url ? String(j.source_url) : undefined,
       matchScore: j.match_score ? Number(j.match_score) : undefined,
       isActive: Boolean(j.is_active),
@@ -481,7 +488,7 @@ export async function POST(req: Request) {
     exclude,
     limit,
     targets,
-  );
+  ).filter((row) => isRealQueueOpening(row.job));
 
   const created: ApplicationQueueItem[] = [];
   for (const { job, matchScore, rubric } of ranked) {
@@ -505,6 +512,20 @@ export async function POST(req: Request) {
       item = (await prepareItemSupabase(user.id, item, resumeRow)) || item;
     }
     created.push(item);
+  }
+
+  if (created.length === 0) {
+    return NextResponse.json({
+      date,
+      created: 0,
+      items: [],
+      slotLabel: digestSlotLabel(slot),
+      live: liveStats,
+      sources: { live: 0, beachhead: 0 },
+      message:
+        "No live OEM/Workday seats this run — credit not used. Paste a real JD URL.",
+      ...stancePayload(existingRuns, queuedCount),
+    });
   }
 
   await sb.from("digest_runs").insert({

@@ -381,6 +381,7 @@ export default function DailyQueuePage() {
 
       <p className="text-sm text-muted-foreground">
         OEM Workday + Greenhouse first. LinkedIn/Naukri are never scraped — paste the JD instead.
+        Daily queue only shows live postings or JDs you paste — not invented company titles.
       </p>
 
       {targetsInfo && !targetsInfo.ready && (
@@ -480,7 +481,7 @@ export default function DailyQueuePage() {
         <EmptyState
           icon="inbox"
           title="No matches queued today"
-          description="Run Morning / Midday / Evening search (3×/day) against beachhead roles matched to your resume, or paste a JD."
+          description="Run Morning / Midday / Evening search against live OEM Workday / Greenhouse seats. Catalog seeds are never queued as fake openings. Or paste a real JD URL."
           action={{
             label: canRun ? "Run search" : "Limit reached",
             onClick: () => canRun && digestMutation.mutate(),

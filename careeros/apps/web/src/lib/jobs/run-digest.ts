@@ -2,7 +2,6 @@ import { localStore } from "@/lib/db/local-store";
 import {
   digestLimitForRun,
   matchContextText,
-  rankJobsForDigest,
   todayDigestDate,
 } from "@/lib/jobs/digest";
 import { discoverLiveJobs, LIVE_ADMISSION_FLOOR, type LiveDiscoverStats } from "@/lib/jobs/live-discover";
@@ -30,7 +29,7 @@ export type DigestRunResult = {
   sources?: { live: number; beachhead: number };
 };
 
-/** Local-store digest: TinyFish live discovery first, family-safe beachhead fill second. */
+/** Local-store digest: live OEM/Workday/TinyFish only. Never invent titles from catalog seeds. */
 export async function runLocalUserDigest(opts: {
   userId: string;
   resumeId?: string;
@@ -139,13 +138,7 @@ export async function runLocalUserDigest(opts: {
   }
   rankedLive.sort((a, b) => b.matchScore - a.matchScore);
 
-  const remaining = limit - rankedLive.length;
-  const rankedSeeds =
-    remaining > 0
-      ? rankJobsForDigest(jobs, profileText, excludeJobIds, remaining, targets)
-      : [];
-
-  const ranked = [...rankedLive, ...rankedSeeds].slice(0, limit);
+  const ranked = rankedLive.slice(0, limit);
   const created: ApplicationQueueItem[] = [];
 
   for (const { job, matchScore, rubric } of ranked) {
@@ -210,7 +203,8 @@ export async function runLocalUserDigest(opts: {
       date,
       created: 0,
       slotLabel: digestSlotLabel(slot),
-      skipped: "No eligible profile-true jobs this run — credit not used. Try again later or paste a JD.",
+      skipped:
+        "No live OEM/Workday seats this run — credit not used. Paste a real JD URL, or try again. We do not invent job titles.",
       items: [],
       live: liveStats,
       sources: { live: 0, beachhead: 0 },

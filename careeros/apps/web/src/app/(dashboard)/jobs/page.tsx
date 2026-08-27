@@ -89,7 +89,7 @@ export default function JobsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Jobs"
-        description="Beachhead manufacturing seeds — CareerOS tracks your apply; you submit on the employer careers page (no silent Easy Apply)."
+        description="Company watchlist only — not live vacancies. Apply from Daily queue when a real OEM posting is found, or paste a JD."
         action={
           <Input
             placeholder="Search jobs..."
