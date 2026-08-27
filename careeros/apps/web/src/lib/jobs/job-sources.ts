@@ -127,6 +127,36 @@ export function attributeJobSource(
   };
 }
 
+/** Candidate-facing: company + exact site to apply on. */
+export function whereToApply(url?: string | null, company?: string | null) {
+  const href = String(url || "").trim();
+  const companyName = String(company || "").trim();
+  if (!href) {
+    return {
+      href: "",
+      host: "",
+      platform: "",
+      applyOn: companyName
+        ? `Apply on ${companyName}'s own careers website. This seat has no public job URL — find the role on their site.`
+        : "No public job URL. Open the company careers site yourself.",
+    };
+  }
+  const attr = attributeJobSource(href, companyName || null);
+  let host = "";
+  try {
+    host = new URL(href).hostname.replace(/^www\./, "");
+  } catch {
+    host = "";
+  }
+  const who = attr.publisher || companyName || "the employer";
+  return {
+    href,
+    host,
+    platform: attr.platform,
+    applyOn: `Apply at ${who} on ${attr.platform}${host ? ` (${host})` : ""}. Fill their form. CareerOS never submits for you.`,
+  };
+}
+
 /** Search cohorts kept small so each TinyFish query remains useful. */
 export function manufacturingSourceSearchClauses(
   family: string,

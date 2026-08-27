@@ -12,7 +12,7 @@ const steps = [
   ["Account + targets", "Role, years, cities (Pan-India), CTC, notice, manufacturing pack."],
   ["Resume ready", "Scorecard + builder so packets start from a real base resume."],
   ["Daily graded seats", "Up to 3 searches/day. Grade A–F, why, and gaps — not 200 junk links."],
-  ["Packet + Confirm", "Tailored resume + cover. You submit on the employer site. Never silent Easy Apply."],
+  ["Packet + Confirm", "CareerOS shows company + the exact careers website. You download the packet, apply on THAT site, then tap I submitted. We never Easy Apply for you."],
   ["Track pipeline", "Applied → interview → offer. Interviews prove the OS, not vanity queue counts."],
 ];
 

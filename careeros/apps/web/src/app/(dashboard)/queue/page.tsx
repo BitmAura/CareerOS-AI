@@ -16,6 +16,7 @@ import { api, ApiError } from "@/lib/api";
 import type { ApplicationQueueItem, DigestRunRecord, ResumeRecord } from "@/lib/db/types";
 import { PRODUCT_STANCE } from "@/lib/product/stance";
 import { formatDisplayDate } from "@/lib/format";
+import { whereToApply } from "@/lib/jobs/job-sources";
 
 type EnginesResponse = {
   jobUrlExtract?: { primary?: string };
@@ -67,6 +68,9 @@ export default function DailyQueuePage() {
 
   const items = data?.items || [];
   const preview = items.find((i) => i.id === previewId) || null;
+  const applySite = preview
+    ? whereToApply(preview.applyUrl || preview.job?.sourceUrl, preview.job?.company)
+    : null;
   const runsUsed = data?.runsUsed ?? 0;
   const runsRemaining = data?.runsRemaining ?? PRODUCT_STANCE.dailyDigestRunsMax;
   const seatsRemaining = data?.seatsRemaining ?? PRODUCT_STANCE.dailyQueueCap;
@@ -493,7 +497,9 @@ export default function DailyQueuePage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {items.map((item) => (
+            {items.map((item) => {
+              const site = whereToApply(item.applyUrl || item.job?.sourceUrl, item.job?.company);
+              return (
               <button
                 key={item.id}
                 type="button"
@@ -503,9 +509,7 @@ export default function DailyQueuePage() {
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium">
-                    {item.job?.title || "Role"} — {item.job?.company}
-                  </span>
+                  <span className="font-medium">{item.job?.company || "Company"}</span>
                   <StatusBadge
                     status={
                       item.status === "approved"
@@ -522,6 +526,10 @@ export default function DailyQueuePage() {
                     {item.status}
                   </StatusBadge>
                 </div>
+                <p className="text-sm text-foreground">{item.job?.title || "Role"}</p>
+                <p className="text-xs text-foreground/80">
+                  {site.host ? `Apply on ${site.host}` : "Apply on company careers site"}
+                </p>
                 <div className="text-xs text-muted-foreground">
                   {item.matchRubric ? (
                     <>
@@ -544,7 +552,8 @@ export default function DailyQueuePage() {
                   <p className="line-clamp-1 text-xs text-muted-foreground">{item.matchRubric.why[0]}</p>
                 )}
               </button>
-            ))}
+              );
+            })}
           </CardContent>
         </Card>
 
@@ -563,6 +572,35 @@ export default function DailyQueuePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {applySite && (
+                  <div className="space-y-2 rounded-lg border border-[#c45c26]/30 bg-[#c45c26]/5 p-3 text-sm">
+                    <p className="font-semibold">Where to apply</p>
+                    <p>
+                      <span className="text-muted-foreground">Company: </span>
+                      {preview.job?.company || "—"}
+                    </p>
+                    <p>{applySite.applyOn}</p>
+                    {applySite.href ? (
+                      <p className="break-all text-xs">
+                        Website:{" "}
+                        <a
+                          href={applySite.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-primary underline"
+                        >
+                          {applySite.host || applySite.href}
+                        </a>
+                      </p>
+                    ) : null}
+                    <ol className="list-decimal space-y-1 pl-4 text-xs text-muted-foreground">
+                      <li>Prepare packet (tailored resume + cover) in CareerOS.</li>
+                      <li>Open the website above — that is the employer form, not Naukri Easy Apply.</li>
+                      <li>Upload the packet and submit on their site.</li>
+                      <li>Come back here and tap “I submitted” so Applications tracks it.</li>
+                    </ol>
+                  </div>
+                )}
                 {preview.matchRubric && (
                   <div className="space-y-2 rounded-lg border bg-muted/40 p-3 text-sm">
                     <div className="font-medium">
@@ -778,7 +816,7 @@ export default function DailyQueuePage() {
           ) : (
             <EmptyState
               title="Select a match"
-              description="Prepare a packet, open the employer careers site, then tap “I submitted” only after you finish their form. CareerOS never auto-submits."
+              description="Click a result. You will see company + the exact website. Packet → open that site → you submit → tap I submitted. CareerOS never auto-applies."
             />
           )}
 

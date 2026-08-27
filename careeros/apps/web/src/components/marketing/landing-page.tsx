@@ -56,7 +56,7 @@ const steps = [
   { n: "01", title: "Account + targets", body: "Purchase / SCM / plant role, years, Pan-India cities, CTC." },
   { n: "02", title: "Resume ready", body: "Scorecard + builder so the packet starts from a strong base." },
   { n: "03", title: "Daily graded seats", body: "OEM + plant seats with why / gaps — not 200 junk links." },
-  { n: "04", title: "Packet + Confirm", body: "Tailored resume + cover; you Confirm and submit." },
+  { n: "04", title: "Packet + Confirm", body: "See company + apply website. You submit there; then tap I submitted." },
   { n: "05", title: "Track pipeline", body: "Move each role through applied → interview → offer." },
 ];
 
