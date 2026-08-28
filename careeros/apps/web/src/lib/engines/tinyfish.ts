@@ -7,7 +7,7 @@
  *
  * CareerOS still does NOT use these to bypass LinkedIn/Naukri login walls
  * or to silent Easy Apply (see PRODUCT_STANCE).
- * IPv4 preference lives in instrumentation.ts (Node only) so Edge OG images can deploy.
+ * IPv4-first DNS is not set here — node:dns cannot ship on Vercel Edge.
  */
 
 export type TinyFishFetchResult = {
