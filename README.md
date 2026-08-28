@@ -14,8 +14,9 @@ Copy `careeros/apps/web/.env.example` to `careeros/apps/web/.env.local`.
 
 ## Vercel
 
-- **Root Directory:** `careeros/apps/web`
+- **Root Directory:** `careeros/apps/web` (must point here — not repo root, not `careeros`)
 - **Framework:** Next.js
+- If Root Directory is `careeros`, Vercel runs Turbo and will fail. Override Build to `npm run build --prefix apps/web` or switch Root to `apps/web`.
 - Do not commit secrets. Set env in Vercel (see `.env.example`).
 
 Minimum to log in on production:
