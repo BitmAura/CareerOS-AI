@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -22,7 +22,7 @@ if (process.env.VERCEL !== "1") {
   process.exit(0);
 }
 
-// Dashboard Output Directory is repo-relative apps/web/.next (missing careeros/).
+// Project Output Directory is repo-relative apps/web/.next (skips careeros/).
 const misplaced = join(appRoot, "..", "..", "..", "apps", "web", ".next");
-mkdirSync(misplaced, { recursive: true });
-copyFileSync(pkgPath, join(misplaced, "package.json"));
+mkdirSync(join(misplaced, ".."), { recursive: true });
+cpSync(nextDir, misplaced, { recursive: true });
