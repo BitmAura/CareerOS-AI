@@ -1,9 +1,11 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { isSupabaseAuthReady } from "@/lib/supabase/env";
+
+export { isSupabaseAuthReady };
 
 export function isSupabaseConfigured() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-  return Boolean(url && serviceKey && !url.includes("your-project"));
+  return isSupabaseAuthReady() && Boolean(serviceKey);
 }
 
 export function getServiceSupabase(): SupabaseClient | null {

@@ -29,7 +29,7 @@ export function LandingNavCta() {
       <Link href="/login" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
         Sign in
       </Link>
-      <Link href="/register" className={cn(buttonVariants({ size: "sm" }))}>
+      <Link href="/login" className={cn(buttonVariants({ size: "sm" }))}>
         Start free
       </Link>
     </div>

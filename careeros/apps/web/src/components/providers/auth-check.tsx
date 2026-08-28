@@ -28,17 +28,18 @@ export default function AuthCheck({ children }: { children: React.ReactNode }) {
   }, [hydrate]);
 
   useEffect(() => {
-    if (!hydrated || !isAuthenticated || !token) return;
+    if (!hydrated) return;
     let cancelled = false;
     (async () => {
       try {
-        const me = await api<{ user: AuthUser }>("/auth/me");
+        const me = await api<{ user: AuthUser; access_token?: string }>("/auth/me");
         if (cancelled) return;
-        if (me?.user) setSession(me.user, token);
-        else {
-          logout();
-          router.replace("/login");
+        if (me?.user) {
+          setSession(me.user, me.access_token || token || "supabase");
+          return;
         }
+        logout();
+        router.replace("/login");
       } catch (e) {
         if (cancelled) return;
         if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
@@ -50,7 +51,7 @@ export default function AuthCheck({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [hydrated, isAuthenticated, token, logout, router, setSession]);
+  }, [hydrated, logout, router, setSession, token]);
 
   useEffect(() => {
     if (hydrated && !isAuthenticated) router.replace("/login");

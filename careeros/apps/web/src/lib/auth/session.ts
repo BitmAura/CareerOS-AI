@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { AUTH_COOKIE } from "@/lib/auth/keys";
 import { localStore } from "@/lib/db/local-store";
-import { getServiceSupabase, isSupabaseConfigured } from "@/lib/supabase/admin";
+import { getServiceSupabase, isSupabaseAuthReady, isSupabaseConfigured } from "@/lib/supabase/admin";
 import type { UserRecord } from "@/lib/db/types";
 
 const COOKIE = AUTH_COOKIE;
@@ -118,6 +118,35 @@ export async function getAuthUser(req: Request) {
   const bearer = header?.startsWith("Bearer ") ? header.slice(7) : null;
   const cookieStore = await cookies();
   const cookieToken = cookieStore.get(COOKIE)?.value;
+
+  if (isSupabaseAuthReady()) {
+    const { createServerSupabase } = await import("@/lib/supabase/server");
+    const server = await createServerSupabase();
+    if (server) {
+      const { data: sessionData } = await server.auth.getUser();
+      let user = sessionData.user;
+      if (!user && bearer) {
+        const { data } = await server.auth.getUser(bearer);
+        user = data.user;
+      }
+      if (user) {
+        const sb = getServiceSupabase() || server;
+        const { data: profile } = await sb.from("profiles").select("*").eq("id", user.id).maybeSingle();
+        return {
+          id: user.id,
+          email: user.email || "",
+          name:
+            profile?.name ||
+            (user.user_metadata?.full_name as string) ||
+            (user.user_metadata?.name as string) ||
+            "User",
+          plan: profile?.plan || "starter",
+          token: bearer || cookieToken || "",
+        };
+      }
+    }
+  }
+
   const token = bearer || cookieToken;
   if (!token) return null;
 
@@ -146,4 +175,4 @@ export async function getAuthUser(req: Request) {
   }
 }
 
-export { COOKIE, COOKIE as AUTH_COOKIE, isSupabaseConfigured };
+export { COOKIE, COOKIE as AUTH_COOKIE, isSupabaseConfigured, isSupabaseAuthReady };

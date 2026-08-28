@@ -34,7 +34,7 @@ export default function PricingPage() {
           <p className="mt-1 text-[#3d4654]">Coming when India inventory depth is consistently buy-worthy.</p>
         </li>
       </ul>
-      <Link href="/register" className="mt-10 inline-block font-semibold text-[#c45c26]">
+      <Link href="/login" className="mt-10 inline-block font-semibold text-[#c45c26]">
         Create account →
       </Link>
     </MarketingShell>

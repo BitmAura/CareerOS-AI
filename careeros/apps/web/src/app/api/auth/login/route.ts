@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
 import {
   AUTH_COOKIE,
+  isSupabaseAuthReady,
   isSupabaseConfigured,
   loginLocal,
   loginSupabase,
 } from "@/lib/auth/session";
 
 export async function POST(req: Request) {
+  if (isSupabaseAuthReady()) {
+    return NextResponse.json(
+      { message: "Use Continue with Google. Email/password login is disabled." },
+      { status: 400 },
+    );
+  }
   try {
     const body = await req.json();
     const email = String(body.email || "").trim().toLowerCase();

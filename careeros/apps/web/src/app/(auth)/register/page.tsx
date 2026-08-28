@@ -1,59 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { User, Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { api, ApiError } from "@/lib/api";
-import { useAuth, type AuthUser } from "@/store/use-auth";
 import { AuthBackHome } from "@/components/marketing/auth-back-home";
-
-const registerSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-type RegisterForm = z.infer<typeof registerSchema>;
+import { GoogleSignInButton } from "@/components/auth/google-sign-in";
 
 export default function RegisterPage() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-  const setSession = useAuth((s) => s.setSession);
-
-  const { register, handleSubmit, formState: { errors } } = useForm<RegisterForm>({
-    resolver: zodResolver(registerSchema),
-  });
-
-  const onSubmit = async (data: RegisterForm) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await api<{ access_token?: string; token?: string; user: AuthUser }>(
-        "/auth/register",
-        {
-          method: "POST",
-          body: data,
-        },
-      );
-      const token = result.access_token || result.token;
-      if (!token) throw new Error("No token returned");
-      setSession(result.user, token);
-      router.push("/profile?onboarding=1");
-    } catch (err) {
-      setError(err instanceof ApiError || err instanceof Error ? err.message : "Registration failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const configured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-muted/30 p-4">
@@ -66,77 +19,23 @@ export default function RegisterPage() {
           >
             CareerOS
           </Link>
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <User className="h-6 w-6" />
-          </div>
-          <CardTitle className="text-2xl">Create an account</CardTitle>
-          <CardDescription>
-            Start your career journey with CareerOS AI
-          </CardDescription>
+          <CardTitle className="text-2xl">Create account</CardTitle>
+          <CardDescription>Same as sign in — Continue with Google. First visit creates your hunter profile.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Full Name</label>
-              <div className="relative">
-                <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input className="pl-9" placeholder="John Doe" {...register("name")} />
-              </div>
-              {errors.name && (
-                <p className="text-sm text-destructive">{errors.name.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input className="pl-9" placeholder="you@example.com" {...register("email")} />
-              </div>
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  className="pl-9 pr-9"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  {...register("password")}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-1 top-1 h-7 w-7"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
-            </div>
-            {error && (
-              <p className="text-sm text-destructive">{error}</p>
-            )}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating account..." : "Create Account"}
-            </Button>
-          </form>
-          <div className="mt-4 text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
+        <CardContent className="space-y-4">
+          {configured ? (
+            <GoogleSignInButton next="/profile?onboarding=1" />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Google signup needs Supabase URL and anon key in .env.local.
+            </p>
+          )}
+          <p className="text-center text-sm text-muted-foreground">
+            Already hunting?{" "}
             <Link href="/login" className="text-primary hover:underline">
               Sign in
             </Link>
-          </div>
+          </p>
         </CardContent>
       </Card>
     </div>

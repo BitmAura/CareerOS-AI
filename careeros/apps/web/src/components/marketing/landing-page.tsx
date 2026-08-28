@@ -87,7 +87,7 @@ const pricing = [
     blurb: "Build the resume and see readiness before you pay for a hunt system.",
     items: ["Resume builder + versions", "ATS-style scorecard", "Markdown / print-PDF packet"],
     cta: "Create free account",
-    href: "/register",
+    href: "/login",
     featured: false,
   },
   {
@@ -102,7 +102,7 @@ const pricing = [
       PRODUCT_STANCE.candidateBuyBar.refundPromise,
     ],
     cta: "Start Concierge",
-    href: "/register",
+    href: "/login",
     featured: true,
   },
   {
@@ -116,7 +116,7 @@ const pricing = [
       "Paste JD + LinkedIn/Naukri alert ingest",
     ],
     cta: "Get early access",
-    href: "/register",
+    href: "/login",
     featured: false,
   },
 ];
@@ -232,7 +232,7 @@ export function LandingPage() {
             Built for India manufacturing hunters. Not IT, banking, campus, or Easy Apply bots.
           </p>
           <div className="mt-8 flex flex-wrap gap-3 animate-[fadeUp_1.1s_ease_both]">
-            <Link href="/register" className={cn(buttonVariants({ size: "lg" }), "gap-2")}>
+            <Link href="/login" className={cn(buttonVariants({ size: "lg" }), "gap-2")}>
               Start free
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -330,7 +330,7 @@ export function LandingPage() {
                 ))}
               </ul>
               <Link
-                href="/register"
+                href="/login"
                 className={cn(
                   buttonVariants({ size: "lg" }),
                   "mt-10 inline-flex gap-2 bg-[#c45c26] text-white hover:bg-[#a84c20]",
@@ -490,7 +490,7 @@ export function LandingPage() {
             Next plant / procurement role shouldn’t depend on Easy Apply. Run the manufacturing OS.
           </p>
           <Link
-            href="/register"
+            href="/login"
             className={cn(
               buttonVariants({ size: "lg" }),
               "mt-8 inline-flex gap-2 bg-[#c45c26] text-white hover:bg-[#a84c20]",
@@ -543,7 +543,7 @@ export function LandingPage() {
                 </Link>
               </li>
               <li>
-                <Link href="/register" className="hover:text-[#12161c]">
+                <Link href="/login" className="hover:text-[#12161c]">
                   Create account
                 </Link>
               </li>

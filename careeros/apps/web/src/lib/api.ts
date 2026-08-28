@@ -23,7 +23,7 @@ export async function api<T>(path: string, options: ApiOptions = {}): Promise<T>
       : null;
   const headers = new Headers(options.headers || {});
 
-  if (token) {
+  if (token && token !== "supabase") {
     headers.set("Authorization", `Bearer ${token}`);
   }
 
@@ -37,6 +37,7 @@ export async function api<T>(path: string, options: ApiOptions = {}): Promise<T>
 
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
+    credentials: "include",
     headers,
     body,
   });
