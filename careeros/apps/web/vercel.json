@@ -1,7 +1,7 @@
 {
   "framework": "nextjs",
   "installCommand": "npm install",
-  "buildCommand": "npm run build",
+  "buildCommand": "next build && node scripts/vercel-after-build.mjs",
   "crons": [
     {
       "path": "/api/cron/digest",

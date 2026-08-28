@@ -19,7 +19,10 @@ if (!existsSync(pkgPath)) {
   );
 }
 
-if (process.env.VERCEL !== "1") {
+console.log("vercel-after-build: mirroring .next and node_modules for Vercel output paths");
+
+const onVercel = process.env.VERCEL === "1" || process.cwd().includes("/vercel/");
+if (!onVercel) {
   process.exit(0);
 }
 
