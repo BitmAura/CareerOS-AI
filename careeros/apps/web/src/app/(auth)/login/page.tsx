@@ -6,11 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Link from "next/link";
 import { AuthBackHome } from "@/components/marketing/auth-back-home";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in";
+import { isSupabaseAuthReady } from "@/lib/supabase/env";
 
 function LoginInner() {
   const params = useSearchParams();
   const error = params.get("error");
-  const configured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  const configured = isSupabaseAuthReady();
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-muted/30 p-4">
@@ -40,8 +41,9 @@ function LoginInner() {
             <GoogleSignInButton next="/dashboard" />
           ) : (
             <p className="text-sm text-muted-foreground">
-              Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY, then enable Google in
-              Supabase Authentication → Providers.
+              Add the Vercel Supabase integration vars (SUPABASE_URL + SUPABASE_PUBLISHABLE_KEY),
+              then enable Google in Supabase Authentication → Providers. Add this site URL to
+              Auth redirect URLs: <code className="text-xs">/auth/callback</code>.
             </p>
           )}
         </CardContent>

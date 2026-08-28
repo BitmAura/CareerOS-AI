@@ -1,28 +1,29 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { isSupabaseAuthReady } from "@/lib/supabase/env";
+import {
+  getSupabaseAnonKey,
+  getSupabaseServiceKey,
+  getSupabaseUrl,
+  isSupabaseAuthReady,
+} from "@/lib/supabase/env";
 
 export { isSupabaseAuthReady };
 
 export function isSupabaseConfigured() {
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-  return isSupabaseAuthReady() && Boolean(serviceKey);
+  return isSupabaseAuthReady() && Boolean(getSupabaseServiceKey());
 }
 
 export function getServiceSupabase(): SupabaseClient | null {
   if (!isSupabaseConfigured()) return null;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceKey = getSupabaseServiceKey();
   if (!serviceKey) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY is required when Supabase is configured");
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SECRET_KEY is required");
   }
-  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey, {
+  return createClient(getSupabaseUrl(), serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
 
 export function getAnonSupabase() {
   if (!isSupabaseConfigured()) return null;
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
+  return createClient(getSupabaseUrl(), getSupabaseAnonKey());
 }

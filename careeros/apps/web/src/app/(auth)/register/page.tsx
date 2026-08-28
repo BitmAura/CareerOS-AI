@@ -4,9 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Link from "next/link";
 import { AuthBackHome } from "@/components/marketing/auth-back-home";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in";
+import { isSupabaseAuthReady } from "@/lib/supabase/env";
 
 export default function RegisterPage() {
-  const configured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  const configured = isSupabaseAuthReady();
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-muted/30 p-4">
