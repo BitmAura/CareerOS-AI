@@ -7,16 +7,8 @@
  *
  * CareerOS still does NOT use these to bypass LinkedIn/Naukri login walls
  * or to silent Easy Apply (see PRODUCT_STANCE).
+ * IPv4 preference lives in instrumentation.ts (Node only) so Edge OG images can deploy.
  */
-
-import dns from "node:dns";
-
-// CloudFront often returns AAAA first; some Windows networks black-hole IPv6 and hang.
-try {
-  dns.setDefaultResultOrder("ipv4first");
-} catch {
-  // older Node — ignore
-}
 
 export type TinyFishFetchResult = {
   url: string;
