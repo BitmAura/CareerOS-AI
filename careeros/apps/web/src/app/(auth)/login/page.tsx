@@ -36,8 +36,10 @@ function LoginInner() {
         <CardContent className="space-y-5">
           {error ? (
             <p className="text-sm text-destructive">
-              {error === "missing_code"
-                ? "Sign-in link was incomplete. Request a new magic link below."
+              {/missing_code|incomplete|otp_expired|invalid or has expired|access_denied/i.test(
+                error,
+              )
+                ? "That sign-in link was already used or expired (Gmail/Outlook can open it once in the background). Request a new email and use the newest link once — or enter the 6-digit code if shown."
                 : decodeURIComponent(error)}
             </p>
           ) : null}
@@ -68,7 +70,10 @@ function LoginInner() {
             <p className="font-medium text-foreground">Share with your network</p>
             <ol className="list-decimal space-y-1 pl-4">
               <li>Open this page and enter your work email.</li>
-              <li>Click the link in the email (check spam).</li>
+              <li>
+                Prefer the <strong>6-digit code</strong> from the email, or click the link{" "}
+                <strong>once</strong> (do not reopen old emails).
+              </li>
               <li>Complete Profile + Resume, then Confirm-apply from your queue.</li>
             </ol>
             <p>

@@ -9,20 +9,19 @@ function safeNext(next: string | null) {
   return "/dashboard";
 }
 
+/**
+ * PKCE-friendly email confirm: use in Supabase Magic Link template as
+ * {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/dashboard
+ */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get("code");
   const tokenHash = searchParams.get("token_hash");
-  const type = searchParams.get("type") as EmailOtpType | null;
-  const next = safeNext(searchParams.get("next"));
-  const authError =
-    searchParams.get("error_description") ||
-    searchParams.get("error") ||
-    searchParams.get("error_code");
+  const type = (searchParams.get("type") || "email") as EmailOtpType;
+  const next = safeNext(searchParams.get("next") || searchParams.get("redirect_to"));
 
-  if (authError && !code && !tokenHash) {
+  if (!tokenHash) {
     return NextResponse.redirect(
-      `${origin}/login?error=${encodeURIComponent(authError)}`,
+      `${origin}/login?error=${encodeURIComponent("Missing sign-in token. Request a new link.")}`,
     );
   }
 
@@ -34,7 +33,6 @@ export async function GET(request: Request) {
 
   const cookieStore = await cookies();
   const redirect = NextResponse.redirect(`${origin}${next}`);
-
   const supabase = createServerClient(url, anon, {
     cookies: {
       getAll() {
@@ -49,29 +47,12 @@ export async function GET(request: Request) {
     },
   });
 
-  if (tokenHash && type) {
-    const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
-    if (error) {
-      return NextResponse.redirect(
-        `${origin}/login?error=${encodeURIComponent(error.message)}`,
-      );
-    }
-    return redirect;
+  const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+  if (error) {
+    return NextResponse.redirect(
+      `${origin}/login?error=${encodeURIComponent(error.message)}`,
+    );
   }
 
-  if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) {
-      return NextResponse.redirect(
-        `${origin}/login?error=${encodeURIComponent(error.message)}`,
-      );
-    }
-    return redirect;
-  }
-
-  return NextResponse.redirect(
-    `${origin}/login?error=${encodeURIComponent(
-      "Sign-in link was incomplete or already used. Request a new magic link.",
-    )}`,
-  );
+  return redirect;
 }

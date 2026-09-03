@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth, type AuthUser } from "@/store/use-auth";
 import { api, ApiError } from "@/lib/api";
@@ -22,6 +22,7 @@ function SessionShell({ label }: { label: string }) {
 export default function AuthCheck({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, hydrated, hydrate, logout, setSession, token } = useAuth();
   const router = useRouter();
+  const [sessionChecked, setSessionChecked] = useState(false);
 
   useLayoutEffect(() => {
     hydrate();
@@ -36,29 +37,38 @@ export default function AuthCheck({ children }: { children: React.ReactNode }) {
         if (cancelled) return;
         if (me?.user) {
           setSession(me.user, me.access_token || token || "supabase");
+          setSessionChecked(true);
           return;
         }
-        logout();
+        await logout();
+        setSessionChecked(true);
         router.replace("/login");
       } catch (e) {
         if (cancelled) return;
         if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
-          logout();
+          await logout();
+          setSessionChecked(true);
           router.replace("/login");
+          return;
         }
+        // Network blip: keep current client session if we already have one
+        setSessionChecked(true);
+        if (!isAuthenticated) router.replace("/login");
       }
     })();
     return () => {
       cancelled = true;
     };
+    // Intentionally omit isAuthenticated — only re-check when hydrate completes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, logout, router, setSession, token]);
 
-  useEffect(() => {
-    if (hydrated && !isAuthenticated) router.replace("/login");
-  }, [hydrated, isAuthenticated, router]);
-
-  if (!hydrated) return <SessionShell label="Loading…" />;
-  if (!isAuthenticated) return <SessionShell label="Redirecting to sign in…" />;
+  if (!hydrated || !sessionChecked) {
+    return <SessionShell label="Checking session…" />;
+  }
+  if (!isAuthenticated) {
+    return <SessionShell label="Redirecting to sign in…" />;
+  }
 
   return <>{children}</>;
 }
