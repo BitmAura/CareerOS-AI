@@ -116,7 +116,7 @@ export default function JobsPage() {
       {!isLoading && !error && filtered.length === 0 && (
         <EmptyState
           title="No jobs yet"
-          description="Jobs seed on first API boot (local) or via Supabase SQL."
+          description="Run Daily queue search to pull real OEM postings with apply URLs. Catalog seeds are hidden."
         />
       )}
 

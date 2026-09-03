@@ -39,6 +39,15 @@ describe("OEM Workday boards", () => {
       }),
     ).toBe(true);
     expect(
+      indiaRelevantLocation("San Francisco, CA", {
+        targetRole: "Sales Manager",
+        yearsExperience: 8,
+        cities: ["Pune"],
+        industryPack: "manufacturing_scm",
+        openToRelocate: true,
+      }),
+    ).toBe(false);
+    expect(
       indiaRelevantLocation("Remote - USA", {
         targetRole: "Sales Manager",
         yearsExperience: 8,

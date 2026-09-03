@@ -78,9 +78,15 @@ export async function GET(req: Request) {
 
   if (isSupabaseConfigured()) {
     const sb = getServiceSupabase()!;
-    const { data, error } = await sb.from("jobs").select("*").eq("is_active", true);
+    const { data, error } = await sb
+      .from("jobs")
+      .select("*")
+      .eq("is_active", true)
+      .not("source_url", "is", null);
     if (error) return NextResponse.json({ message: error.message }, { status: 500 });
-    const jobs = (data || []).map((j) =>
+    const jobs = (data || [])
+      .filter((j) => Boolean(j.source_url))
+      .map((j) =>
       mapJobWithLiveMatch(
         {
           id: j.id,
@@ -92,6 +98,9 @@ export async function GET(req: Request) {
           requirements: j.requirements || [],
           source: j.source,
           sourceUrl: j.source_url,
+          sourceKind: /manual|beachhead/i.test(String(j.source || ""))
+            ? "beachhead"
+            : "live",
           matchScore: j.match_score,
           isActive: j.is_active,
           createdAt: j.created_at,
@@ -105,9 +114,9 @@ export async function GET(req: Request) {
     return NextResponse.json(jobs);
   }
 
-  const jobs = (await localStore.listJobs()).map((j) =>
-    mapJobWithLiveMatch(j, profileText, targets),
-  );
+  const jobs = (await localStore.listJobs())
+    .filter((j) => Boolean(j.sourceUrl) && j.sourceKind !== "beachhead")
+    .map((j) => mapJobWithLiveMatch(j, profileText, targets));
   jobs.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
   return NextResponse.json(jobs);
 }

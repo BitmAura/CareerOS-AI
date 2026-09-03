@@ -8,6 +8,7 @@
 import { isTinyFishConfigured, tinyfishFetchOne } from "@/lib/engines/tinyfish";
 import { extractJobSignals, type JobSignals } from "@/lib/jobs/job-signals";
 import { attributeJobSource } from "@/lib/jobs/job-sources";
+import { guessLocationFromText, htmlToPlainText } from "@/lib/jobs/html-plain";
 import {
   inferRoleFamilyFromText,
   type RoleFamily,
@@ -36,16 +37,7 @@ export type ExtractedJob = {
 };
 
 function stripHtml(html: string): string {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/\s+/g, " ")
-    .trim();
+  return htmlToPlainText(html);
 }
 
 type JsonLdJob = Partial<ExtractedJob> & {
@@ -85,9 +77,11 @@ function parseJsonLdJobs(html: string): JsonLdJob | null {
           company: n.hiringOrganization?.name || n.hiringOrganization || "",
           location:
             n.jobLocation?.address?.addressLocality ||
+            n.jobLocation?.address?.addressRegion ||
             n.jobLocation?.name ||
             (typeof n.jobLocation === "string" ? n.jobLocation : "") ||
-            "India",
+            guessLocationFromText(description) ||
+            "",
           description,
           ...signals,
           isJobDetail: true,
@@ -138,9 +132,12 @@ export function isJobDetailUrl(url: string): boolean {
 
     // Known ATS job-detail patterns
     if (/boards\.greenhouse\.io\/.+\/jobs\/\d+/i.test(href)) return true;
+    if (/job-boards\.greenhouse\.io\/.+\/jobs\/\d+/i.test(href)) return true;
     if (/jobs\.lever\.co\/[^/]+\/[a-f0-9-]{8,}/i.test(href)) return true;
     if (/jobs\.ashbyhq\.com\/[^/]+\/[^/]+/i.test(href)) return true;
     if (/myworkdayjobs\.com\/.+\/job\//i.test(href)) return true;
+    if (/myworkdayjobs\.com\/.+\/_?[Jj][Oo][Bb]/i.test(href)) return true;
+    if (/WD\d{6,}/i.test(href)) return true;
     if (/jobs\.siemens\.com\/.+\/jobdetail\//i.test(href)) return true;
     if (/jobs\.smartrecruiters\.com\/[^/]+\/[^/]+/i.test(href)) return true;
     if (/careers\.se\.com\/jobs\/\d+/i.test(href)) return true;
@@ -224,7 +221,11 @@ function parseJobFromHtml(
 
   let title = ld?.title || "";
   let company = typeof ld?.company === "string" ? ld.company : "";
-  const location = ld?.location || "India";
+  let location =
+    (typeof ld?.location === "string" ? ld.location : "") ||
+    stripHtml(
+      html.match(/property=["']og:locale:alternate["'][^>]*content=["']([^"']+)["']/i)?.[1] || "",
+    );
   let description = ld?.description || "";
 
   if (!title) {
@@ -242,6 +243,9 @@ function parseJobFromHtml(
       html.match(/<main[^>]*>([\s\S]*?)<\/main>/i)?.[1] ||
       "";
     description = stripHtml(content).slice(0, 8000);
+  }
+  if (!location) {
+    location = guessLocationFromText(`${title}\n${description}`) || "";
   }
   if (description.length < 40) {
     throw new Error("Could not extract enough job text. Paste the JD manually.");
@@ -291,7 +295,7 @@ function parseJobFromMarkdown(
   return enrichExtracted({
     title: title.slice(0, 160),
     company: companyFromHost(url),
-    location: "India",
+    location: guessLocationFromText(`${title}\n${description}`) || "",
     description,
     applyUrl: url,
     source,

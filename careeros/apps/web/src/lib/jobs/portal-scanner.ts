@@ -10,6 +10,7 @@ import {
   indiaRelevantLocation,
   profileKeywordHit,
 } from "@/lib/jobs/portal-filters";
+import { htmlToPlainText } from "@/lib/jobs/html-plain";
 import { scanIndiaOemWorkday, type OemScanStats } from "@/lib/jobs/oem-workday-scanner";
 import type { ExtractedJob } from "@/lib/jobs/extract-job-url";
 import type { CareerTargets } from "@/lib/db/types";
@@ -30,14 +31,7 @@ export type PortalScanStats = {
 };
 
 function stripHtml(html: string): string {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/\s+/g, " ")
-    .trim();
+  return htmlToPlainText(html);
 }
 
 async function fetchGreenhouse(board: PortalBoard): Promise<ExtractedJob[]> {

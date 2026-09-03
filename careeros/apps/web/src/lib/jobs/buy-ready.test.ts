@@ -53,6 +53,9 @@ describe("URL detail gating", () => {
       isJobDetailUrl("https://boards.greenhouse.io/acme/jobs/1234567"),
     ).toBe(true);
     expect(
+      isJobDetailUrl("https://job-boards.greenhouse.io/fictiv/jobs/8744932002"),
+    ).toBe(true);
+    expect(
       isUsablePublicJobUrl("https://boards.greenhouse.io/acme/jobs/1234567"),
     ).toBe(true);
     expect(
@@ -199,7 +202,14 @@ describe("location + family admission", () => {
     expect(
       isRealQueueOpening({ sourceKind: "beachhead", source: "beachhead" }),
     ).toBe(false);
-    expect(isRealQueueOpening({ sourceKind: "live", source: "workday" })).toBe(true);
+    expect(isRealQueueOpening({ sourceKind: "live", source: "workday" })).toBe(false);
+    expect(
+      isRealQueueOpening({
+        sourceKind: "live",
+        source: "workday",
+        sourceUrl: "https://jci.wd5.myworkdayjobs.com/JCI/job/Pune/Role_WD1",
+      }),
+    ).toBe(true);
   });
 
   it("roleFamiliesCompatible works", () => {

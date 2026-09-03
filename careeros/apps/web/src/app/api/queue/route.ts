@@ -2,10 +2,8 @@ import { NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth/session";
 import { localStore } from "@/lib/db/local-store";
 import {
-  digestLimitForRun,
   profileTextFromResume,
   isRealQueueOpening,
-  rankJobsForDigest,
   remainingQueueSeats,
   todayDigestDate,
 } from "@/lib/jobs/digest";
@@ -331,7 +329,15 @@ export async function POST(req: Request) {
     });
   }
 
-  // Supabase path
+  // Supabase path — live OEM/portal only (shared with cron)
+  const { runSupabaseUserDigest } = await import("@/lib/jobs/run-digest-supabase");
+  const result = await runSupabaseUserDigest({
+    userId: user.id,
+    resumeId: resumeId || undefined,
+    autoPrepare,
+    date,
+  });
+
   const sb = getServiceSupabase()!;
   const { data: runRows } = await sb
     .from("digest_runs")
@@ -346,223 +352,38 @@ export async function POST(req: Request) {
     createdCount: Number(r.created_count) || 0,
     ranAt: String(r.ran_at),
   }));
-  if (existingRuns.length >= PRODUCT_STANCE.dailyDigestRunsMax) {
-    return NextResponse.json(
-      { message: `Already ran ${PRODUCT_STANCE.dailyDigestRunsMax} searches today.`, ...stancePayload(existingRuns, 0) },
-      { status: 429 },
-    );
-  }
-
   const { data: existingQ } = await sb
     .from("application_queue")
     .select("job_id")
     .eq("user_id", user.id)
     .eq("digest_date", date);
   const queuedCount = (existingQ || []).length;
-  const limit = digestLimitForRun(queuedCount);
-  if (limit <= 0) {
+
+  if (result.skipped && result.created === 0) {
+    const status = /full|Already ran/i.test(result.skipped) ? 429 : 200;
     return NextResponse.json(
-      { message: "Daily review queue is full.", ...stancePayload(existingRuns, queuedCount) },
-      { status: 429 },
+      {
+        message: result.skipped,
+        date: result.date,
+        created: 0,
+        items: [],
+        live: result.live,
+        sources: result.sources,
+        ...stancePayload(existingRuns, queuedCount),
+      },
+      { status },
     );
   }
-
-  const slot = digestSlotForRunIndex(existingRuns.length);
-  const { data: jobsRaw } = await sb.from("jobs").select("*").eq("is_active", true);
-  const jobRows: Array<Record<string, unknown>> = [...(jobsRaw || [])];
-  const { data: apps } = await sb.from("applications").select("job_id").eq("user_id", user.id);
-  const { data: resumes } = await sb
-    .from("resumes")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
-
-  const resumeRow = resumeId
-    ? (resumes || []).find((r) => r.id === resumeId)
-    : (resumes || [])[0];
-  const profileText = profileTextFromResume(
-    resumeRow
-      ? {
-          id: resumeRow.id,
-          userId: user.id,
-          fileName: resumeRow.file_name,
-          fileUrl: resumeRow.file_url,
-          fileSize: resumeRow.file_size,
-          mimeType: resumeRow.mime_type,
-          rawText: resumeRow.raw_text,
-          aiScore: resumeRow.ai_score,
-          parsedData: resumeRow.parsed_data,
-          suggestions: resumeRow.suggestions,
-          status: resumeRow.status,
-          createdAt: resumeRow.created_at,
-          updatedAt: resumeRow.updated_at,
-        }
-      : null,
-  );
-
-  const { data: profileRow } = await sb
-    .from("profiles")
-    .select("career_targets")
-    .eq("id", user.id)
-    .maybeSingle();
-  const targets = normalizeTargets((profileRow?.career_targets as never) || emptyTargets());
-
-  const exclude = new Set<string>([
-    ...(apps || []).map((a) => String(a.job_id)),
-    ...(existingQ || []).map((q) => String(q.job_id)),
-  ]);
-
-  // Live TinyFish → insert public careers jobs into Supabase pool
-  let liveCount = 0;
-  let liveStats: Awaited<ReturnType<typeof import("@/lib/jobs/live-discover").discoverLiveJobs>>["stats"] | undefined;
-  try {
-    const { discoverLiveJobs } = await import("@/lib/jobs/live-discover");
-    const excludeUrls = new Set(
-      jobRows.map((j) => String(j.source_url || "")).filter(Boolean),
-    );
-    const resumeForLive = resumeRow
-      ? {
-          id: resumeRow.id,
-          userId: user.id,
-          fileName: resumeRow.file_name,
-          fileUrl: resumeRow.file_url || "",
-          fileSize: resumeRow.file_size || 0,
-          mimeType: resumeRow.mime_type || "text/plain",
-          rawText: resumeRow.raw_text || "",
-          status: resumeRow.status,
-          createdAt: resumeRow.created_at,
-          updatedAt: resumeRow.updated_at,
-        }
-      : null;
-    const discovered = await discoverLiveJobs({
-      targets,
-      resume: resumeForLive as never,
-      limit: Math.min(limit, PRODUCT_STANCE.perDigestTarget),
-      excludeUrls,
-    });
-    liveStats = discovered.stats;
-    for (const ex of discovered.jobs) {
-      const { data: inserted } = await sb
-        .from("jobs")
-        .insert({
-          title: ex.title,
-          company: ex.company,
-          location: ex.location || "India",
-          description: ex.description,
-          requirements: [],
-          source: ex.source || "tinyfish_live",
-          source_url: ex.applyUrl,
-          is_active: true,
-        })
-        .select("*")
-        .single();
-      if (inserted) {
-        liveCount += 1;
-        jobRows.push(inserted);
-      }
-    }
-  } catch (e) {
-    console.warn("Supabase live discover skipped", e);
-  }
-
-  const ranked = rankJobsForDigest(
-    jobRows.map((j) => ({
-      id: String(j.id),
-      title: String(j.title),
-      company: String(j.company),
-      location: String(j.location || "India"),
-      salary: j.salary ? String(j.salary) : undefined,
-      description: String(j.description || ""),
-      requirements: (j.requirements as string[]) || [],
-      source: String(j.source || "career_page"),
-      sourceKind: /tinyfish|workday|portal|greenhouse/.test(String(j.source || "").toLowerCase())
-        ? "live"
-        : "career_page",
-      sourceUrl: j.source_url ? String(j.source_url) : undefined,
-      matchScore: j.match_score ? Number(j.match_score) : undefined,
-      isActive: Boolean(j.is_active),
-      createdAt: String(j.created_at || ""),
-      updatedAt: String(j.updated_at || ""),
-    })),
-    profileText,
-    exclude,
-    limit,
-    targets,
-  ).filter((row) => isRealQueueOpening(row.job));
-
-  const created: ApplicationQueueItem[] = [];
-  for (const { job, matchScore, rubric } of ranked) {
-    const { data: row, error } = await sb
-      .from("application_queue")
-      .insert({
-        user_id: user.id,
-        job_id: job.id,
-        digest_date: date,
-        match_score: matchScore,
-        status: "queued",
-        digest_slot: slot,
-        apply_url: job.sourceUrl,
-        notes: JSON.stringify(rubric),
-      })
-      .select("*, jobs(*)")
-      .single();
-    if (error || !row) continue;
-    let item = mapSbQueue(row, row.jobs as Record<string, unknown>);
-    if (autoPrepare && resumeRow) {
-      item = (await prepareItemSupabase(user.id, item, resumeRow)) || item;
-    }
-    created.push(item);
-  }
-
-  if (created.length === 0) {
-    return NextResponse.json({
-      date,
-      created: 0,
-      items: [],
-      slotLabel: digestSlotLabel(slot),
-      live: liveStats,
-      sources: { live: 0, beachhead: 0 },
-      message:
-        "No live OEM/Workday seats this run — credit not used. Paste a real JD URL.",
-      ...stancePayload(existingRuns, queuedCount),
-    });
-  }
-
-  await sb.from("digest_runs").insert({
-    user_id: user.id,
-    digest_date: date,
-    slot,
-    created_count: created.length,
-    ran_at: new Date().toISOString(),
-  });
 
   return NextResponse.json({
-    date,
-    created: created.length,
-    items: created,
-    slotLabel: digestSlotLabel(slot),
-    live: liveStats,
-    sources: { live: liveCount, beachhead: Math.max(0, created.length - liveCount) },
-    message:
-      liveCount > 0
-        ? `Live TinyFish: ${liveCount} · remaining from catalog`
-        : liveStats?.searched === false
-          ? "Catalog only — set TINYFISH_API_KEY for live public careers search."
-          : undefined,
-    ...stancePayload(
-      [
-        ...existingRuns,
-        {
-          id: "new",
-          userId: user.id,
-          digestDate: date,
-          slot,
-          createdCount: created.length,
-          ranAt: new Date().toISOString(),
-        },
-      ],
-      queuedCount + created.length,
-    ),
+    date: result.date,
+    created: result.created,
+    items: result.items,
+    slotLabel: result.slotLabel,
+    live: result.live,
+    sources: result.sources,
+    message: result.message,
+    ...stancePayload(existingRuns, queuedCount),
   });
 }
 
