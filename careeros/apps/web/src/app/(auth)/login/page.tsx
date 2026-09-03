@@ -7,6 +7,7 @@ import Link from "next/link";
 import { AuthBackHome } from "@/components/marketing/auth-back-home";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in";
 import { MagicLinkForm } from "@/components/auth/magic-link-form";
+import { PasswordSignInForm } from "@/components/auth/password-sign-in";
 import { isSupabaseAuthReady } from "@/lib/supabase/env";
 import { PRODUCT_STANCE } from "@/lib/product/stance";
 
@@ -29,8 +30,8 @@ function LoginInner() {
           </Link>
           <CardTitle className="text-2xl">Sign in</CardTitle>
           <CardDescription>
-            Private network pilot — India manufacturing (Purchase / SCM / plant). No password.
-            New hunters use a magic link.
+            Private network pilot — India manufacturing (Purchase / SCM / plant). Use email +
+            password if you were given an account, or a magic link if you are new.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
@@ -46,6 +47,15 @@ function LoginInner() {
 
           {configured ? (
             <>
+              <PasswordSignInForm next="/dashboard" />
+              <div className="relative py-1">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase tracking-wide text-muted-foreground">
+                  <span className="bg-card px-2">or magic link</span>
+                </div>
+              </div>
               <MagicLinkForm next="/dashboard" />
               <div className="relative py-1">
                 <div className="absolute inset-0 flex items-center">
@@ -57,7 +67,7 @@ function LoginInner() {
               </div>
               <GoogleSignInButton next="/dashboard" />
               <p className="text-center text-xs text-muted-foreground">
-                Google only works after Google is enabled in Supabase. Prefer magic link for this pilot.
+                Google only works after Google is enabled in Supabase.
               </p>
             </>
           ) : (
@@ -69,11 +79,8 @@ function LoginInner() {
           <div className="space-y-2 rounded-lg border border-dashed border-border p-3 text-left text-xs text-muted-foreground">
             <p className="font-medium text-foreground">Share with your network</p>
             <ol className="list-decimal space-y-1 pl-4">
-              <li>Open this page and enter your work email.</li>
-              <li>
-                Prefer the <strong>6-digit code</strong> from the email, or click the link{" "}
-                <strong>once</strong> (do not reopen old emails).
-              </li>
+              <li>If you have a password: sign in with email + password on this page.</li>
+              <li>If you are new: request a magic link / 6-digit code.</li>
               <li>Complete Profile + Resume, then Confirm-apply from your queue.</li>
             </ol>
             <p>
