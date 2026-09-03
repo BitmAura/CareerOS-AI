@@ -73,7 +73,16 @@ export async function POST(req: Request) {
     }
   }
 
-  // Developer Test Mode / Mock Flow (instant sandbox order when credentials aren't set in dev)
+  // Developer Test Mode / Mock Flow — never in production without explicit opt-in
+  const allowMock =
+    process.env.NODE_ENV !== "production" || process.env.BILLING_ALLOW_MOCK === "true";
+  if (!allowMock) {
+    return NextResponse.json(
+      { message: "Razorpay is not configured. Paid upgrades are disabled." },
+      { status: 503 },
+    );
+  }
+
   const mockOrderId = `order_mock_${crypto.randomBytes(8).toString("hex")}`;
   return NextResponse.json({
     orderId: mockOrderId,

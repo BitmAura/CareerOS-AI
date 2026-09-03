@@ -26,6 +26,8 @@ export async function POST(req: Request) {
   }
 
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  const allowMock =
+    process.env.NODE_ENV !== "production" || process.env.BILLING_ALLOW_MOCK === "true";
 
   // If live Razorpay key secret is present, verify SHA256 signature
   if (keySecret) {
@@ -43,6 +45,16 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+  } else if (!allowMock) {
+    return NextResponse.json(
+      { message: "Billing is not configured. Payments are disabled until Razorpay is connected." },
+      { status: 503 },
+    );
+  } else if (String(razorpay_order_id).startsWith("order_mock_") !== true) {
+    return NextResponse.json(
+      { message: "Invalid test payment. Use a mock order from this environment." },
+      { status: 400 },
+    );
   }
 
   const targetPlan = String(plan).toLowerCase() === "pro" ? "pro" : "concierge";

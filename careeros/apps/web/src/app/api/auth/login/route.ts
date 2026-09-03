@@ -10,7 +10,7 @@ import {
 export async function POST(req: Request) {
   if (isSupabaseAuthReady()) {
     return NextResponse.json(
-      { message: "Use Continue with Google. Email/password login is disabled." },
+      { message: "Use Email me a magic link on /login. Email/password login is disabled." },
       { status: 400 },
     );
   }

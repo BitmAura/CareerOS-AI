@@ -21,9 +21,22 @@ export function GoogleSignInButton({ next = "/dashboard" }: { next?: string }) {
           queryParams: { prompt: "select_account" },
         },
       });
-      if (oauthError) setError(oauthError.message);
+      if (oauthError) {
+        const msg = oauthError.message || "";
+        setError(
+          /provider is not enabled|unsupported provider/i.test(msg)
+            ? "Google is not enabled on Supabase yet. Open Authentication → Providers → Google, turn it on, and paste your Google Cloud Client ID + Secret."
+            : msg,
+        );
+        setLoading(false);
+      }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Google sign-in failed");
+      const msg = e instanceof Error ? e.message : "Google sign-in failed";
+      setError(
+        /provider is not enabled|unsupported provider/i.test(msg)
+          ? "Google is not enabled on Supabase yet. Open Authentication → Providers → Google, turn it on, and paste your Google Cloud Client ID + Secret."
+          : msg,
+      );
       setLoading(false);
     }
   };

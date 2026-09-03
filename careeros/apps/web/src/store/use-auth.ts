@@ -16,7 +16,7 @@ interface AuthState {
   hydrated: boolean;
   setSession: (user: AuthUser, token: string) => void;
   setUser: (user: AuthUser | null) => void;
-  logout: () => void;
+  logout: () => void | Promise<void>;
   hydrate: () => void;
 }
 
@@ -40,8 +40,14 @@ export const useAuth = create<AuthState>((set) => ({
     }
     set({ user });
   },
-  logout: () => {
+  logout: async () => {
     if (typeof window !== "undefined") {
+      try {
+        const { createBrowserSupabase } = await import("@/lib/supabase/browser");
+        await createBrowserSupabase().auth.signOut();
+      } catch {
+        // Local JWT / missing Supabase env — still clear client state
+      }
       localStorage.removeItem(AUTH_TOKEN_KEY);
       localStorage.removeItem(AUTH_USER_KEY);
       localStorage.removeItem("token");

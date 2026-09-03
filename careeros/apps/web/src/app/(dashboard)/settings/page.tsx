@@ -44,8 +44,8 @@ export default function SettingsPage() {
             <Button
               size="sm"
               variant="destructive"
-              onClick={() => {
-                logout();
+              onClick={async () => {
+                await logout();
                 router.push("/login");
               }}
             >

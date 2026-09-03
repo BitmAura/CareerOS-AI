@@ -6,12 +6,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Link from "next/link";
 import { AuthBackHome } from "@/components/marketing/auth-back-home";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in";
+import { MagicLinkForm } from "@/components/auth/magic-link-form";
 import { isSupabaseAuthReady } from "@/lib/supabase/env";
+import { PRODUCT_STANCE } from "@/lib/product/stance";
 
 function LoginInner() {
   const params = useSearchParams();
   const error = params.get("error");
   const configured = isSupabaseAuthReady();
+  const buy = PRODUCT_STANCE.candidateBuyBar;
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-muted/30 p-4">
@@ -26,26 +29,66 @@ function LoginInner() {
           </Link>
           <CardTitle className="text-2xl">Sign in</CardTitle>
           <CardDescription>
-            Google only. CareerOS uses your Google account via Supabase Auth — no password.
+            Private network pilot — India manufacturing (Purchase / SCM / plant). No password.
+            New hunters use a magic link.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5">
           {error ? (
             <p className="text-sm text-destructive">
               {error === "missing_code"
-                ? "Google did not return a login code. Enable the Google provider in Supabase Auth."
+                ? "Sign-in link was incomplete. Request a new magic link below."
                 : decodeURIComponent(error)}
             </p>
           ) : null}
+
           {configured ? (
-            <GoogleSignInButton next="/dashboard" />
+            <>
+              <MagicLinkForm next="/dashboard" />
+              <div className="relative py-1">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase tracking-wide text-muted-foreground">
+                  <span className="bg-card px-2">or</span>
+                </div>
+              </div>
+              <GoogleSignInButton next="/dashboard" />
+              <p className="text-center text-xs text-muted-foreground">
+                Google only works after Google is enabled in Supabase. Prefer magic link for this pilot.
+              </p>
+            </>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Add the Vercel Supabase integration vars (SUPABASE_URL + SUPABASE_PUBLISHABLE_KEY),
-              then enable Google in Supabase Authentication → Providers. Add this site URL to
-              Auth redirect URLs: <code className="text-xs">/auth/callback</code>.
+              Auth is not configured yet (missing Supabase URL / anon key).
             </p>
           )}
+
+          <div className="space-y-2 rounded-lg border border-dashed border-border p-3 text-left text-xs text-muted-foreground">
+            <p className="font-medium text-foreground">Share with your network</p>
+            <ol className="list-decimal space-y-1 pl-4">
+              <li>Open this page and enter your work email.</li>
+              <li>Click the link in the email (check spam).</li>
+              <li>Complete Profile + Resume, then Confirm-apply from your queue.</li>
+            </ol>
+            <p>
+              Pilot is invite-only and free while we prove value. Paid Concierge target is ₹
+              {buy.conciergeInrMonthly}/mo only after digests + packets work for you —{" "}
+              {buy.refundPromise}
+            </p>
+            <p>
+              Limits: {PRODUCT_STANCE.dailyDigestRunsMax} digests/day,{" "}
+              {PRODUCT_STANCE.dailyQueueCap} Confirm-apply seats/day. You always submit — never silent
+              Easy Apply.
+            </p>
+          </div>
+
+          <p className="text-center text-sm text-muted-foreground">
+            First time?{" "}
+            <Link href="/register" className="text-primary hover:underline">
+              Create account
+            </Link>
+          </p>
         </CardContent>
       </Card>
     </div>
