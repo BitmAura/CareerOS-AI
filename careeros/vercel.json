@@ -1,6 +1,6 @@
 {
-  "installCommand": "npm install --prefix apps/web",
-  "buildCommand": "npm run build --prefix apps/web",
+  "installCommand": "npm install",
+  "buildCommand": "npm run build --workspace=web",
   "crons": [
     {
       "path": "/api/cron/digest",

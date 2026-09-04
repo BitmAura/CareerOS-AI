@@ -10,6 +10,7 @@
     "start": "npm run start --prefix careeros/apps/web",
     "test": "npm test --prefix careeros/apps/web",
     "lint": "npm run lint --prefix careeros/apps/web",
-    "typecheck": "npm exec --prefix careeros/apps/web -- tsc --noEmit"
+    "typecheck": "npm exec --prefix careeros/apps/web -- tsc --noEmit",
+    "vercel-install": "npm install --prefix careeros/apps/web"
   }
 }
